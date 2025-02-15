@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard News</title>
+    <title>Ship-Up - Le ultime news</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f2f5;
             margin: 0;
             padding: 20px;
             display: flex;
@@ -15,49 +15,33 @@
             align-items: center;
         }
         .container {
-            max-width: 800px;
+            width: 80%;
+            max-width: 900px;
             background: white;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             position: relative;
         }
-        h2, h3 {
+        h2 {
             text-align: center;
             color: #333;
         }
         .news-container {
             margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
         }
         .news-item {
+            background: #fff;
             padding: 15px;
-            border-bottom: 1px solid #ddd;
-            transition: background 0.3s;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
-        .news-item:hover {
-            background: #f9f9f9;
-        }
-        .chatbox {
-            margin-top: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background: #e3e3e3;
-        }
-        .chatbox input {
-            width: 80%;
-            padding: 8px;
-            margin-right: 10px;
-        }
-        .chatbox button {
-            padding: 8px 12px;
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
-        .chatbox button:hover {
-            background: #0056b3;
+        .news-item strong {
+            font-size: 18px;
+            color: #007bff;
         }
         .admin-section {
             margin-top: 20px;
@@ -68,17 +52,19 @@
             width: 100%;
             padding: 10px;
             margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
         }
         .admin-section button {
             padding: 10px;
-            background: #28a745;
+            background: #007bff;
             color: white;
             border: none;
             cursor: pointer;
             border-radius: 5px;
         }
         .admin-section button:hover {
-            background: #218838;
+            background: #0056b3;
         }
         #admin-login-btn {
             position: absolute;
@@ -94,70 +80,28 @@
         #admin-login-btn:hover {
             background: #e68900;
         }
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.4);
-        }
-        .modal-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 300px;
-            text-align: center;
-            border-radius: 10px;
-        }
-        .modal input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-        }
-        .modal button {
-            padding: 10px;
-            background: #007bff;
-            color: white;
-            border: none;
-            cursor: pointer;
-            border-radius: 5px;
-        }
     </style>
 </head>
 <body>
     <div class="container">
-        <button id="admin-login-btn" onclick="openModal()">Admin Login</button>
-        <h2>News Aziendali</h2>
+        <button id="admin-login-btn">Admin Login</button>
+        <h2>Ship-Up - Le ultime news</h2>
         <div id="news-container" class="news-container"></div>
-        
-        <h3>Assistente IA</h3>
-        <div class="chatbox">
-            <input type="text" id="user-input" placeholder="Chiedi qualcosa..." onkeypress="handleKeyPress(event)">
-            <button onclick="askAI()">Invia</button>
-            <p id="ai-response"></p>
-        </div>
         
         <div class="admin-section" id="admin-section">
             <h3>Aggiungi News</h3>
             <input type="text" id="news-title" placeholder="Titolo">
             <textarea id="news-content" placeholder="Contenuto"></textarea>
+            <input type="file" id="news-file" multiple>
             <button onclick="addNews()">Pubblica</button>
         </div>
     </div>
     
-    <div id="login-modal" class="modal">
-        <div class="modal-content">
-            <h3>Inserisci Password</h3>
-            <input type="password" id="admin-password" placeholder="Password">
-            <button onclick="checkPassword()">Accedi</button>
-        </div>
-    </div>
-    
     <script>
+        document.getElementById("admin-login-btn").addEventListener("click", function() {
+            document.getElementById("admin-section").style.display = "flex";
+        });
+        
         function loadNews() {
             let container = document.getElementById("news-container");
             container.innerHTML = "";
@@ -165,47 +109,32 @@
             storedNews.forEach(n => {
                 let div = document.createElement("div");
                 div.className = "news-item";
-                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>`;
+                let fileLinks = "";
+                if (n.files) {
+                    n.files.forEach(file => {
+                        fileLinks += `<p><a href="${file}" target="_blank">📎 Allegato</a></p>`;
+                    });
+                }
+                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>${fileLinks}`;
                 container.appendChild(div);
             });
-        }
-        
-        function askAI() {
-            let input = document.getElementById("user-input").value.toLowerCase();
-            let response = "Non ho trovato una risposta.";
-            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            storedNews.forEach(n => {
-                if (n.title.toLowerCase().includes(input) || n.content.toLowerCase().includes(input)) {
-                    response = `Ecco cosa ho trovato: ${n.content}`;
-                }
-            });
-            document.getElementById("ai-response").innerText = response;
-        }
-        
-        function handleKeyPress(event) {
-            if (event.key === "Enter") askAI();
-        }
-        
-        function openModal() {
-            document.getElementById("login-modal").style.display = "block";
-        }
-        
-        function checkPassword() {
-            let pass = document.getElementById("admin-password").value;
-            if (pass === "admin123") {
-                document.getElementById("admin-section").style.display = "flex";
-                document.getElementById("login-modal").style.display = "none";
-            } else {
-                alert("Password errata");
-            }
         }
         
         function addNews() {
             let title = document.getElementById("news-title").value;
             let content = document.getElementById("news-content").value;
+            let filesInput = document.getElementById("news-file").files;
+            let files = [];
+            
+            for (let i = 0; i < filesInput.length; i++) {
+                let file = filesInput[i];
+                let url = URL.createObjectURL(file);
+                files.push(url);
+            }
+            
             if (title && content) {
                 let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-                storedNews.push({ title, content });
+                storedNews.push({ title, content, files });
                 localStorage.setItem("news", JSON.stringify(storedNews));
                 loadNews();
                 document.getElementById("news-title").value = "";
