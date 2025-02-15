@@ -167,25 +167,4 @@
 
         function deleteNews(index) {
             let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            storedNews.splice(index, 1);
-            localStorage.setItem("news", JSON.stringify(storedNews));
-            loadNews();
-        }
-
-        function editNews(index) {
-            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            let news = storedNews[index];
-            document.getElementById("news-title").value = news.title;
-            document.getElementById("news-content").value = news.content;
-            deleteNews(index);
-        }
-
-        function confirmRead(index) {
-            let readNews = JSON.parse(localStorage.getItem("readNews")) || {};
-            readNews[index] = true;
-            localStorage.setItem("readNews", JSON.stringify(readNews));
-            loadNews();
-        }
-    </script>
-</body>
-</html>
+            storedNews ▋
