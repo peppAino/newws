@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ship-Up - Le ultime news</title>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -15,8 +16,8 @@
             align-items: center;
         }
         .container {
-            width: 80%;
-            max-width: 900px;
+            width: 90%;
+            max-width: 1000px;
             background: white;
             padding: 20px;
             border-radius: 10px;
@@ -38,15 +39,30 @@
             padding: 15px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
+            width: 100%;
+            position: relative;
         }
         .news-item strong {
             font-size: 18px;
             color: #007bff;
         }
+        .news-item button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
         .admin-section {
             margin-top: 20px;
             display: none;
             flex-direction: column;
+            width: 100%;
         }
         .admin-section input, .admin-section textarea {
             width: 100%;
@@ -80,6 +96,9 @@
         #admin-login-btn:hover {
             background: #e68900;
         }
+        emoji-picker {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
@@ -92,6 +111,7 @@
             <h3>Aggiungi News</h3>
             <input type="text" id="news-title" placeholder="Titolo">
             <textarea id="news-content" placeholder="Contenuto"></textarea>
+            <emoji-picker id="emoji-picker"></emoji-picker>
             <input type="file" id="news-file" multiple>
             <button onclick="addNews()">Pubblica</button>
         </div>
@@ -101,12 +121,21 @@
         document.getElementById("admin-login-btn").addEventListener("click", function() {
             document.getElementById("admin-section").style.display = "flex";
         });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const emojiPicker = document.querySelector("emoji-picker");
+            if (emojiPicker) {
+                emojiPicker.addEventListener("emoji-click", event => {
+                    document.getElementById("news-content").value += event.detail.unicode;
+                });
+            }
+        });
         
         function loadNews() {
             let container = document.getElementById("news-container");
             container.innerHTML = "";
             let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            storedNews.forEach(n => {
+            storedNews.forEach((n, index) => {
                 let div = document.createElement("div");
                 div.className = "news-item";
                 let fileLinks = "";
@@ -115,7 +144,7 @@
                         fileLinks += `<p><a href="${file}" target="_blank">📎 Allegato</a></p>`;
                     });
                 }
-                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>${fileLinks}`;
+                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>${fileLinks}<button onclick="deleteNews(${index})">Elimina</button>`;
                 container.appendChild(div);
             });
         }
@@ -140,6 +169,13 @@
                 document.getElementById("news-title").value = "";
                 document.getElementById("news-content").value = "";
             }
+        }
+        
+        function deleteNews(index) {
+            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
+            storedNews.splice(index, 1);
+            localStorage.setItem("news", JSON.stringify(storedNews));
+            loadNews();
         }
         
         window.onload = loadNews;
