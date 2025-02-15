@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ship-Up - Le ultime news</title>
     <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1" defer></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js" defer></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -153,6 +153,38 @@
                     <button class="read-btn" onclick="confirmRead(${index})" ${readNews[index] ? 'disabled' : ''}>${readNews[index] ? 'Letto' : 'Conferma lettura'}</button>`;
                 container.appendChild(div);
             });
+        }
+        
+        function addNews() {
+            let title = document.getElementById("news-title").value;
+            let content = document.getElementById("news-content").value;
+            let files = document.getElementById("news-file").files;
+            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
+            storedNews.push({ title, content, files: Array.from(files).map(f => f.name) });
+            localStorage.setItem("news", JSON.stringify(storedNews));
+            loadNews();
+        }
+
+        function deleteNews(index) {
+            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
+            storedNews.splice(index, 1);
+            localStorage.setItem("news", JSON.stringify(storedNews));
+            loadNews();
+        }
+
+        function editNews(index) {
+            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
+            let news = storedNews[index];
+            document.getElementById("news-title").value = news.title;
+            document.getElementById("news-content").value = news.content;
+            deleteNews(index);
+        }
+
+        function confirmRead(index) {
+            let readNews = JSON.parse(localStorage.getItem("readNews")) || {};
+            readNews[index] = true;
+            localStorage.setItem("readNews", JSON.stringify(readNews));
+            loadNews();
         }
     </script>
 </body>
