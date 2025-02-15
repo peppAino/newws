@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ship-Up - Le ultime news</title>
-    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1"></script>
+    <script src="https://cdn.jsdelivr.net/npm/emoji-picker-element@^1" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -61,6 +62,12 @@
             right: 60px;
             background: #28a745;
         }
+        .read-btn {
+            bottom: 10px;
+            right: 10px;
+            background: #007bff;
+            position: absolute;
+        }
         .admin-section {
             margin-top: 20px;
             display: none;
@@ -112,12 +119,18 @@
     </div>
     
     <script>
-        document.getElementById("admin-login-btn").addEventListener("click", function() {
-            document.getElementById("admin-section").style.display = "flex";
-        });
-
         document.addEventListener("DOMContentLoaded", function() {
-            const emojiPicker = document.querySelector("emoji-picker");
+            document.getElementById("admin-login-btn").addEventListener("click", function() {
+                let password = prompt("Inserisci la password admin:");
+                let hashedPassword = "b109f3bbbc244eb82441917ed06d618b9008dd09d42d149f7d3a42bdf24c6e41"; 
+                if (CryptoJS.SHA256(password).toString() === hashedPassword) {
+                    document.getElementById("admin-section").style.display = "flex";
+                } else {
+                    alert("Password errata!");
+                }
+            });
+
+            const emojiPicker = document.getElementById("emoji-picker");
             if (emojiPicker) {
                 emojiPicker.addEventListener("emoji-click", event => {
                     document.getElementById("news-content").value += event.detail.unicode;
@@ -130,57 +143,16 @@
             let container = document.getElementById("news-container");
             container.innerHTML = "";
             let storedNews = JSON.parse(localStorage.getItem("news")) || [];
+            let readNews = JSON.parse(localStorage.getItem("readNews")) || {};
             storedNews.forEach((n, index) => {
                 let div = document.createElement("div");
                 div.className = "news-item";
-                let fileLinks = "";
-                if (n.files) {
-                    n.files.forEach(file => {
-                        fileLinks += `<p><a href="${file}" target="_blank">📎 Allegato</a></p>`;
-                    });
-                }
-                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>${fileLinks}
+                div.innerHTML = `<strong>${n.title}</strong><p>${n.content}</p>
                     <button class="edit-btn" onclick="editNews(${index})">Modifica</button>
-                    <button onclick="deleteNews(${index})">Elimina</button>`;
+                    <button onclick="deleteNews(${index})">Elimina</button>
+                    <button class="read-btn" onclick="confirmRead(${index})" ${readNews[index] ? 'disabled' : ''}>${readNews[index] ? 'Letto' : 'Conferma lettura'}</button>`;
                 container.appendChild(div);
             });
-        }
-        
-        function addNews() {
-            let title = document.getElementById("news-title").value;
-            let content = document.getElementById("news-content").value;
-            let filesInput = document.getElementById("news-file").files;
-            let files = [];
-            
-            for (let i = 0; i < filesInput.length; i++) {
-                let file = filesInput[i];
-                let url = URL.createObjectURL(file);
-                files.push(url);
-            }
-            
-            if (title && content) {
-                let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-                storedNews.push({ title, content, files });
-                localStorage.setItem("news", JSON.stringify(storedNews));
-                loadNews();
-            }
-        }
-        
-        function editNews(index) {
-            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            let newsItem = storedNews[index];
-            document.getElementById("news-title").value = newsItem.title;
-            document.getElementById("news-content").value = newsItem.content;
-            storedNews.splice(index, 1);
-            localStorage.setItem("news", JSON.stringify(storedNews));
-            loadNews();
-        }
-        
-        function deleteNews(index) {
-            let storedNews = JSON.parse(localStorage.getItem("news")) || [];
-            storedNews.splice(index, 1);
-            localStorage.setItem("news", JSON.stringify(storedNews));
-            loadNews();
         }
     </script>
 </body>
