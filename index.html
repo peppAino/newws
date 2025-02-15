@@ -122,7 +122,7 @@
         document.addEventListener("DOMContentLoaded", function() {
             document.getElementById("admin-login-btn").addEventListener("click", function() {
                 let password = prompt("Inserisci la password admin:");
-                let hashedPassword = "b109f3bbbc244eb82441917ed06d618b9008dd09d42d149f7d3a42bdf24c6e41"; 
+                let hashedPassword = "a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa7e62a7e90a8e52bfa2e"; // Nuovo hash SHA-256
                 if (CryptoJS.SHA256(password).toString() === hashedPassword) {
                     document.getElementById("admin-section").style.display = "flex";
                 } else {
